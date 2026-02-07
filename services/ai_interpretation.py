@@ -102,6 +102,12 @@ def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str |
         if text:
             logger.info(f"Broad context interpretation generated (Length: {len(text)})")
             return text
+        return None
+    except Exception as e:
+        logger.error(f"Gemini contextual interpretation error: {e}")
+        return None
+
+
 def get_daily_interpretation(shloka: dict) -> str | None:
     """Generate a daily inspirational message based on a shloka for push notifications."""
     client = _get_gemini_client()
