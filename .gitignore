@@ -40,6 +40,11 @@ gitagpt.log
 chroma_data/
 .chroma/
 
+# Documentation (local only)
+docs/
+CODEBASE_OVERVIEW.md
+DEPLOY.md
+
 # Testing
 .pytest_cache/
 htmlcov/
