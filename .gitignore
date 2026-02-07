@@ -1,0 +1,46 @@
+# Environment variables (contains API keys - NEVER commit!)
+.env
+.env.*
+!.env.example
+
+# Claude Code local settings
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+gitagpt.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# ChromaDB
+chroma_data/
+.chroma/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage

@@ -1,0 +1,68 @@
+{
+  "chinta": {
+    "name_hi": "मुझे चिंता/डर लगता है",
+    "name_en": "Fear and Anxiety",
+    "best_shlokas": [
+      "2.14", "2.15", "2.56", "4.10", "6.35",
+      "2.64", "2.65", "2.70", "6.7", "6.10", "6.25"
+    ],
+    "keywords": [
+      "डर", "भय", "चिंता", "घबराहट", "शांति", "मन", "ध्यान",
+      "anxiety", "fear", "worried", "peace", "calm", "restless",
+      "meditation", "focus", "peaceful", "एकाग्रता", "tension",
+      "nervous", "stressed", "तनाव", "बेचैन"
+    ]
+  },
+  "krodh": {
+    "name_hi": "मुझे गुस्सा आता है",
+    "name_en": "Anger",
+    "best_shlokas": [
+      "2.62", "2.63", "3.37", "5.26", "16.21"
+    ],
+    "keywords": [
+      "गुस्सा", "क्रोध", "anger", "angry", "irritation",
+      "चिड़चिड़ा", "गुस्से", "irritated", "frustrated", "rage"
+    ]
+  },
+  "kartavya": {
+    "name_hi": "मुझे समझ नहीं आता क्या करूं",
+    "name_en": "Duty and Decisions",
+    "best_shlokas": [
+      "2.47", "2.48", "3.8", "3.19", "4.18",
+      "2.7", "4.35", "4.40", "1.28", "3.21"
+    ],
+    "keywords": [
+      "कर्म", "कर्तव्य", "काम", "duty", "work", "action",
+      "responsibility", "संशय", "भ्रम", "confusion", "doubt",
+      "confused", "समझ नहीं", "क्या करूं", "परिवार", "रिश्ता",
+      "decision", "फैसला", "उलझन"
+    ]
+  },
+  "dukh": {
+    "name_hi": "मैं बीमार हूं / कोई खो दिया",
+    "name_en": "Illness, Death and Grief",
+    "best_shlokas": [
+      "2.11", "2.13", "2.20", "2.22", "2.27",
+      "2.14", "2.15", "5.20", "6.20"
+    ],
+    "keywords": [
+      "मृत्यु", "मौत", "death", "loss", "died", "मरना",
+      "दुख", "तकलीफ", "परेशानी", "sad", "suffering", "pain",
+      "बीमार", "बीमारी", "illness", "sick", "grief", "शोक",
+      "खो दिया", "गम", "problem", "difficulty"
+    ]
+  },
+  "akela": {
+    "name_hi": "मैं अकेला महसूस करता हूं",
+    "name_en": "Loneliness and Isolation",
+    "best_shlokas": [
+      "9.22", "9.26", "9.29", "12.13", "12.14",
+      "5.21", "6.27"
+    ],
+    "keywords": [
+      "अकेला", "अकेलापन", "loneliness", "isolation", "alone", "lonely",
+      "भक्ति", "श्रद्धा", "विश्वास", "भगवान", "devotion", "faith",
+      "सुख", "खुशी", "आनंद", "कोई नहीं", "साथ"
+    ]
+  }
+}
