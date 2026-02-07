@@ -27,6 +27,7 @@ def get_ai_interpretation(user_query: str, shlokas: list[dict]) -> str:
 # --- Gemini contextual interpretation (Phase 2) ---
 
 _gemini_client = None
+_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
 
 
 def _get_gemini_client():
@@ -45,6 +46,33 @@ def _get_gemini_client():
     except Exception as e:
         logger.error(f"Gemini init error: {e}")
         return None
+
+
+def _generate(client, prompt: str, max_tokens: int) -> str | None:
+    """Call Gemini with automatic fallback on quota exhaustion."""
+    for model in _MODELS:
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config={
+                    'max_output_tokens': max_tokens,
+                    'temperature': 0.7,
+                    'http_options': {'timeout': 15_000},
+                },
+            )
+            text = response.text.strip()
+            if text:
+                logger.info(f"Generated via {model} (Length: {len(text)})")
+                return text
+        except Exception as e:
+            if '429' in str(e) or 'RESOURCE_EXHAUSTED' in str(e):
+                logger.warning(f"{model} quota exhausted, trying fallback...")
+                continue
+            logger.error(f"Gemini error ({model}): {e}")
+            return None
+    logger.error("All Gemini models exhausted")
+    return None
 
 
 def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str | None:
@@ -91,24 +119,7 @@ def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str |
 - टोन: गंभीर (Mature), शांत (Calm) और गरिमापूर्ण (Dignified)।
 - **बिल्कुल न लिखें:** श्लोक संख्या, संस्कृत शब्द, या कोई हेडिंग।"""
 
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=prompt,
-            config={
-                'max_output_tokens': 1000,
-                'temperature': 0.7,
-                'http_options': {'timeout': 15_000},
-            },
-        )
-        text = response.text.strip()
-        if text:
-            logger.info(f"Broad context interpretation generated (Length: {len(text)})")
-            return text
-        return None
-    except Exception as e:
-        logger.error(f"Gemini contextual interpretation error: {e}")
-        return None
+    return _generate(client, prompt, max_tokens=1000)
 
 
 def get_daily_interpretation(shloka: dict) -> str | None:
@@ -142,21 +153,4 @@ def get_daily_interpretation(shloka: dict) -> str | None:
 - टोन: गंभीर, शांत और प्रेरक।
 - **बिल्कुल न लिखें:** श्लोक संख्या, संस्कृत शब्द, या कोई हेडिंग।"""
 
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=prompt,
-            config={
-                'max_output_tokens': 500,
-                'temperature': 0.7,
-                'http_options': {'timeout': 15_000},
-            },
-        )
-        text = response.text.strip()
-        if text:
-            logger.info(f"Daily interpretation generated for {shloka['shloka_id']}")
-            return text
-        return None
-    except Exception as e:
-        logger.error(f"Gemini daily interpretation error: {e}")
-        return None
+    return _generate(client, prompt, max_tokens=500)
