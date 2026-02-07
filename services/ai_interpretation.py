@@ -58,6 +58,7 @@ def _generate(client, prompt: str, max_tokens: int) -> str | None:
                 config={
                     'max_output_tokens': max_tokens,
                     'temperature': 0.7,
+                    'thinking_config': {'thinking_budget': 0},
                     'http_options': {'timeout': 15_000},
                 },
             )
