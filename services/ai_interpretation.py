@@ -92,11 +92,14 @@ def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str |
 - **बिल्कुल न लिखें:** श्लोक संख्या, संस्कृत शब्द, या कोई हेडिंग।"""
 
     try:
-        # Using gemini-2.0-flash which is confirmed available and reliable
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=prompt,
-            config={'max_output_tokens': 1000, 'temperature': 0.7},
+            config={
+                'max_output_tokens': 1000,
+                'temperature': 0.7,
+                'http_options': {'timeout': 15_000},
+            },
         )
         text = response.text.strip()
         if text:
@@ -143,7 +146,11 @@ def get_daily_interpretation(shloka: dict) -> str | None:
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=prompt,
-            config={'max_output_tokens': 500, 'temperature': 0.7},
+            config={
+                'max_output_tokens': 500,
+                'temperature': 0.7,
+                'http_options': {'timeout': 15_000},
+            },
         )
         text = response.text.strip()
         if text:

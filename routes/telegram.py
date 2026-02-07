@@ -2,6 +2,7 @@
 
 import logging
 import tempfile
+from collections import deque
 
 from flask import Blueprint, request, jsonify
 
@@ -28,6 +29,9 @@ logger = logging.getLogger('gitagpt.telegram')
 
 bp = Blueprint('telegram', __name__)
 
+# Deduplication: track recent update_ids to prevent Telegram retry duplicates
+_recent_updates = deque(maxlen=100)
+
 
 def _reply(chat_id, text, reply_markup=None):
     """Helper to send reply."""
@@ -40,6 +44,14 @@ def _reply(chat_id, text, reply_markup=None):
 def telegram_webhook():
     """Receive Telegram updates via webhook."""
     data = request.get_json(force=True)
+
+    # Deduplicate: skip if we already processed this update
+    update_id = data.get('update_id')
+    if update_id in _recent_updates:
+        logger.info(f"Skipping duplicate update_id={update_id}")
+        return jsonify({'ok': True})
+    if update_id:
+        _recent_updates.append(update_id)
 
     try:
         if 'callback_query' in data:
