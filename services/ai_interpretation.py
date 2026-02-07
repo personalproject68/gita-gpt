@@ -154,4 +154,4 @@ def get_daily_interpretation(shloka: dict) -> str | None:
 - टोन: गंभीर, शांत और प्रेरक।
 - **बिल्कुल न लिखें:** श्लोक संख्या, संस्कृत शब्द, या कोई हेडिंग।"""
 
-    return _generate(client, prompt, max_tokens=500)
+    return _generate(client, prompt, max_tokens=1000)
