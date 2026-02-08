@@ -7,7 +7,7 @@ from collections import deque
 from flask import Blueprint, request, jsonify
 
 from config import TOPIC_MENU, ADMIN_USER_ID
-from services.telegram_api import send_message, send_chat_action, answer_callback_query, get_file, download_file
+from services.telegram_api import send_message, send_chat_action, answer_callback_query, get_file, download_file, make_inline_keyboard
 from services.search import find_relevant_shlokas
 from services.ai_interpretation import (
     get_ai_interpretation, get_contextual_interpretation,
@@ -17,8 +17,9 @@ from services.formatter import (
     format_shloka_list, format_welcome, format_help,
     format_topic_keyboard, format_shloka,
     format_rate_limit, format_content_blocked, format_invalid_input,
+    format_amrit_menu, format_amrit_shloka,
 )
-from models.shloka import CURATED_TOPICS, SHLOKA_LOOKUP
+from models.shloka import CURATED_TOPICS, SHLOKA_LOOKUP, COMPLETE_LOOKUP
 from services.voice import transcribe_voice
 from services.daily import subscribe, unsubscribe, get_journey_position, advance_journey, send_journey_shloka
 from services.metrics import get_daily_stats
@@ -102,6 +103,10 @@ def _handle_command(chat_id, text):
         message, markup = send_journey_shloka(user_id, position)
         _reply(chat_id, message, markup)
 
+    elif cmd == '/amrit':
+        text, keyboard = format_amrit_menu()
+        _reply(chat_id, text, keyboard)
+
     elif cmd == '/stats':
         if user_id != ADMIN_USER_ID:
             _reply(chat_id, format_help())
@@ -172,6 +177,11 @@ def _handle_text(chat_id, message):
         _reply(chat_id, message, markup)
         return
 
+    if msg_lower in ['अमृत', 'amrit', 'प्रसिद्ध', 'famous']:
+        text, keyboard = format_amrit_menu()
+        _reply(chat_id, text, keyboard)
+        return
+
     if msg_lower in ['और', 'more', 'aur', 'next']:
         _handle_more(chat_id, user_id)
         return
@@ -229,6 +239,26 @@ def _handle_callback(callback_query):
         new_pos = advance_journey(user_id)
         message, markup = send_journey_shloka(user_id, new_pos)
         _reply(chat_id, message, markup)
+        return
+
+    # अमृत श्लोक: back to menu or show specific shloka
+    if data == 'amrit:back':
+        text, keyboard = format_amrit_menu()
+        _reply(chat_id, text, keyboard)
+        return
+
+    if data.startswith('amrit:'):
+        shloka_id = data.split(':', 1)[1]
+        shloka = COMPLETE_LOOKUP.get(shloka_id)
+        if not shloka:
+            _reply(chat_id, "श्लोक नहीं मिला।")
+            return
+        logger.info(f"Amrit shloka: {shloka_id} by {user_id}")
+        send_chat_action(chat_id, 'typing')
+        interpretation = get_ai_interpretation("", [shloka])
+        response = format_amrit_shloka(shloka, interpretation)
+        back_button = make_inline_keyboard([[{'text': '← अमृत श्लोक', 'callback_data': 'amrit:back'}]])
+        _reply(chat_id, response, back_button)
         return
 
     if not data.startswith('topic:'):

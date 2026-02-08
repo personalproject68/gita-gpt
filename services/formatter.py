@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-from config import TOPIC_MENU
+from config import TOPIC_MENU, AMRIT_SHLOKAS
 from services.telegram_api import make_inline_keyboard
 
 
@@ -95,6 +95,7 @@ def format_welcome() -> str:
 
 📚 विषय देखने के लिए /topic भेजें
 🌅 आज का श्लोक: /daily
+📿 प्रसिद्ध श्लोक: /amrit
 
 अपना प्रश्न हिंदी या English में पूछें... 🙏"""
 
@@ -110,6 +111,7 @@ def format_help() -> str:
 
 • /topic या विषय — विषयों की सूची
 • /daily या प्रेरणा — आज का श्लोक
+• /amrit या अमृत — प्रसिद्ध श्लोक
 • और — अगला संबंधित श्लोक
 • रोकें — दैनिक श्लोक बंद करें
 
@@ -229,3 +231,45 @@ def format_journey_complete() -> str:
 गीता का ज्ञान सदा आपके साथ रहे। 🙏
 
 — गीता GPT 🙏"""
+
+
+def format_amrit_menu() -> tuple[str, dict]:
+    """Return अमृत श्लोक menu text + inline keyboard markup."""
+    text = "📿 अमृत श्लोक — गीता के सबसे प्रसिद्ध श्लोक\n\nनीचे बटन दबाएं 👇"
+
+    buttons = []
+    for shloka_id, label in AMRIT_SHLOKAS:
+        buttons.append([{'text': f"गीता {shloka_id} — {label}", 'callback_data': f'amrit:{shloka_id}'}])
+
+    keyboard = make_inline_keyboard(buttons)
+    return text, keyboard
+
+
+def format_amrit_shloka(shloka: dict, interpretation: str = "") -> str:
+    """Format an amrit shloka response."""
+    shabdarth, bhavarth, guidance = _parse_interpretation(interpretation)
+
+    parts = [
+        f"📿 अमृत श्लोक — गीता {shloka['shloka_id']}",
+        "",
+        shloka['sanskrit'],
+    ]
+
+    if shabdarth:
+        parts.extend(["", f"📖 {shabdarth}"])
+
+    if bhavarth:
+        parts.extend(["", bhavarth])
+    else:
+        parts.extend(["", _strip_verse_ref(shloka['hindi_meaning'])])
+
+    commentary = _strip_verse_ref(shloka.get('hindi_commentary', ''))
+    if commentary:
+        parts.extend(["", f"📜 {_trim_commentary(commentary)}"])
+
+    if guidance:
+        parts.extend(["", f"💭 {guidance}"])
+
+    parts.extend(["", "— गीता GPT 🙏"])
+
+    return '\n'.join(parts)

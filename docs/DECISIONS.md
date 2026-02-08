@@ -24,6 +24,7 @@
 | P13 | Need visibility into bot usage | /stats admin command | SQLite metrics (DAU, messages, subscribers) | - | ✅ Done |
 | P14 | Daily shloka felt repetitive | Expanded daily pool to 30 shlokas | 30 best shlokas across 8 chapters, date-based cycling | Fresh daily content | ✅ Done |
 | P15 | Daily shlokas feel random, no retention | गीता यात्रा — sequential 701-shloka journey | journey_position in SQLite, inline "अगला श्लोक →" button | "Complete the entire Gita" | ✅ Done |
+| P16 | No curated "greatest hits" discovery path | अमृत श्लोक — 10 iconic shlokas as inline menu | AMRIT_SHLOKAS in config, COMPLETE_LOOKUP + pre-fetched interpretations | /amrit command + text triggers | ✅ Done |
 
 ---
 
