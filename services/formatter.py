@@ -5,6 +5,19 @@ from config import TOPIC_MENU
 from services.telegram_api import make_inline_keyboard
 
 
+def _trim_commentary(text: str, max_len: int = 300) -> str:
+    """Trim commentary to max_len, cutting at last sentence boundary."""
+    if not text or len(text) <= max_len:
+        return text
+    trimmed = text[:max_len]
+    # Cut at last sentence-ending punctuation
+    for sep in ['।', '|', '.', '॥']:
+        idx = trimmed.rfind(sep)
+        if idx > 50:
+            return trimmed[:idx + 1]
+    return trimmed.rstrip() + '…'
+
+
 def _parse_interpretation(interpretation: str) -> tuple[str, str, str]:
     """Parse Gemini's --- separated output into (shabdarth, bhavarth, guidance).
     Returns empty strings for missing parts."""
@@ -35,6 +48,10 @@ def format_shloka(shloka: dict, interpretation: str = "") -> str:
         parts.extend(["", bhavarth])
     else:
         parts.extend(["", shloka['hindi_meaning']])
+
+    commentary = shloka.get('hindi_commentary', '')
+    if commentary:
+        parts.extend(["", f"📜 {_trim_commentary(commentary)}"])
 
     if guidance:
         parts.extend(["", f"💭 {guidance}"])
@@ -118,6 +135,10 @@ def format_daily_shloka(shloka: dict, interpretation: str = "") -> str:
         parts.extend(["", bhavarth])
     else:
         parts.extend(["", shloka['hindi_meaning']])
+
+    commentary = shloka.get('hindi_commentary', '')
+    if commentary:
+        parts.extend(["", f"📜 {_trim_commentary(commentary)}"])
 
     if guidance:
         parts.extend(["", f"💭 {guidance}"])

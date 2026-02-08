@@ -76,49 +76,47 @@ def _generate(client, prompt: str, max_tokens: int) -> str | None:
     return None
 
 
-_SHABDARTH_PROMPT = """आप श्रीमद्भगवद्गीता के विद्वान हैं। नीचे दिए गए श्लोक के लिए ठीक इस format में output दें।
+_SHABDARTH_PROMPT = """आप श्रीमद्भगवद्गीता के विद्वान हैं। केवल नीचे दिए गए एक श्लोक के लिए output दें। किसी अन्य श्लोक का उल्लेख न करें।
 
 श्लोक:
 {sanskrit}
 
 अर्थ: {hindi_meaning}
-{commentary}
 व्यक्ति का प्रश्न: "{user_query}"
 
-कृपया नीचे दिए गए तीन भाग लिखें, हर भाग को "[SECTION]" से अलग करें:
+कृपया ठीक तीन भाग लिखें, हर भाग को "[SECTION]" से अलग करें:
 
-भाग 1 — शब्दार्थ: संस्कृत के हर मुख्य शब्द/पद का हिंदी अर्थ, pipe (|) से अलग।
+भाग 1 — शब्दार्थ (1 पंक्ति): केवल इस श्लोक के मुख्य संस्कृत शब्दों का हिंदी अर्थ, pipe (|) से अलग।
 उदाहरण: यदा यदा = जब-जब | धर्मस्य = धर्म की | ग्लानिः = हानि
 
-भाग 2 — भावार्थ: श्लोक का सरल हिंदी अर्थ (1-2 वाक्य)। शुद्ध सरल हिंदी।
+भाग 2 — भावार्थ (1-2 वाक्य): श्लोक का सरल हिंदी अर्थ। शुद्ध सरल हिंदी।
 
-भाग 3 — मार्गदर्शन: व्यक्ति के प्रश्न के संदर्भ में गीता की शिक्षा को जोड़ते हुए सहज, गरिमापूर्ण मार्गदर्शन (2-3 वाक्य)।
+भाग 3 — मार्गदर्शन (2-3 वाक्य): व्यक्ति के प्रश्न के संदर्भ में गीता की शिक्षा से सहज मार्गदर्शन।
 टोन: शांत, सम्मानजनक। "आप" का प्रयोग। Hinglish/अंग्रेज़ी से बचें।
 
-बिल्कुल न लिखें: कोई heading, label, श्लोक संख्या, या "शब्दार्थ:", "भावार्थ:" जैसे prefix।
-सिर्फ content लिखें, [SECTION] से अलग करें।"""
+बिल्कुल न लिखें: कोई heading, label, श्लोक संख्या, "शब्दार्थ:", "भावार्थ:" जैसे prefix, या कोई अन्य श्लोक।
+सिर्फ content लिखें, [SECTION] से अलग करें। संक्षिप्त रखें।"""
 
 
-_DAILY_PROMPT = """आप श्रीमद्भगवद्गीता के विद्वान हैं। आज के दैनिक श्लोक के लिए ठीक इस format में output दें।
+_DAILY_PROMPT = """आप श्रीमद्भगवद्गीता के विद्वान हैं। केवल नीचे दिए गए एक श्लोक के लिए output दें। किसी अन्य श्लोक का उल्लेख न करें।
 
 श्लोक:
 {sanskrit}
 
 अर्थ: {hindi_meaning}
-{commentary}
 
-कृपया नीचे दिए गए तीन भाग लिखें, हर भाग को "[SECTION]" से अलग करें:
+कृपया ठीक तीन भाग लिखें, हर भाग को "[SECTION]" से अलग करें:
 
-भाग 1 — शब्दार्थ: संस्कृत के हर मुख्य शब्द/पद का हिंदी अर्थ, pipe (|) से अलग।
+भाग 1 — शब्दार्थ (1 पंक्ति): केवल इस श्लोक के मुख्य संस्कृत शब्दों का हिंदी अर्थ, pipe (|) से अलग।
 उदाहरण: यदा यदा = जब-जब | धर्मस्य = धर्म की | ग्लानिः = हानि
 
-भाग 2 — भावार्थ: श्लोक का सरल हिंदी अर्थ (1-2 वाक्य)। शुद्ध सरल हिंदी।
+भाग 2 — भावार्थ (1-2 वाक्य): श्लोक का सरल हिंदी अर्थ। शुद्ध सरल हिंदी।
 
-भाग 3 — आज का चिंतन: इस श्लोक से जुड़ा एक प्रेरणादायक विचार जो पूरे दिन साथ रहे (2-3 वाक्य)।
+भाग 3 — आज का चिंतन (2-3 वाक्य): इस श्लोक से जुड़ा एक प्रेरणादायक विचार जो पूरे दिन साथ रहे।
 टोन: शांत, सम्मानजनक, प्रेरक। "आप" का प्रयोग। Hinglish/अंग्रेज़ी से बचें।
 
-बिल्कुल न लिखें: कोई heading, label, श्लोक संख्या, या "शब्दार्थ:", "भावार्थ:" जैसे prefix।
-सिर्फ content लिखें, [SECTION] से अलग करें।"""
+बिल्कुल न लिखें: कोई heading, label, श्लोक संख्या, "शब्दार्थ:", "भावार्थ:" जैसे prefix, या कोई अन्य श्लोक।
+सिर्फ content लिखें, [SECTION] से अलग करें। संक्षिप्त रखें।"""
 
 
 def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str | None:
@@ -128,14 +126,9 @@ def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str |
         return None
 
     s = shlokas[0]
-    commentary = ""
-    if s.get('hindi_commentary'):
-        commentary = f"व्याख्या: {s['hindi_commentary'][:500]}"
-
     prompt = _SHABDARTH_PROMPT.format(
         sanskrit=s['sanskrit'],
         hindi_meaning=s['hindi_meaning'],
-        commentary=commentary,
         user_query=user_query,
     )
 
@@ -148,14 +141,9 @@ def get_daily_interpretation(shloka: dict) -> str | None:
     if not client:
         return None
 
-    commentary = ""
-    if shloka.get('hindi_commentary'):
-        commentary = f"व्याख्या: {shloka['hindi_commentary'][:500]}"
-
     prompt = _DAILY_PROMPT.format(
         sanskrit=shloka['sanskrit'],
         hindi_meaning=shloka['hindi_meaning'],
-        commentary=commentary,
     )
 
     return _generate(client, prompt, max_tokens=1000)
