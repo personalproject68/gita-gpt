@@ -35,6 +35,18 @@ def setup_database():
     )
 
     cursor.execute('''
+        CREATE TABLE IF NOT EXISTS events (
+            event_type TEXT,
+            user_id TEXT,
+            data TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    cursor.execute(
+        'CREATE INDEX IF NOT EXISTS idx_events_type_time ON events(event_type, created_at)'
+    )
+
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS subscribers (
             user_id TEXT PRIMARY KEY,
             subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

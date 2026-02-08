@@ -6,7 +6,7 @@ from collections import deque
 
 from flask import Blueprint, request, jsonify
 
-from config import TOPIC_MENU
+from config import TOPIC_MENU, ADMIN_USER_ID
 from services.telegram_api import send_message, send_chat_action, answer_callback_query, get_file, download_file
 from services.search import find_relevant_shlokas
 from services.ai_interpretation import (
@@ -21,6 +21,7 @@ from services.formatter import (
 from models.shloka import CURATED_TOPICS, SHLOKA_LOOKUP, get_daily_shloka
 from services.voice import transcribe_voice
 from services.daily import subscribe, unsubscribe
+from services.metrics import get_daily_stats
 from guardrails.rate_limiter import check_rate_limit
 from guardrails.content_filter import check_content
 from guardrails.sanitizer import sanitize_input, is_valid_input
@@ -101,6 +102,24 @@ def _handle_command(chat_id, text):
         save_session(user_id, 'daily', [shloka])
         interpretation = get_daily_interpretation(shloka)
         _reply(chat_id, format_daily_shloka(shloka, interpretation))
+
+    elif cmd == '/stats':
+        if user_id != ADMIN_USER_ID:
+            _reply(chat_id, format_help())
+            return
+        stats = get_daily_stats()
+        if stats:
+            text = (
+                f"📊 GitaGPT Stats — {stats['date']}\n\n"
+                f"👥 DAU yesterday: {stats['dau']}\n"
+                f"🆕 New users: {stats['new_users']}\n"
+                f"💬 Messages: {stats['total_messages']}\n"
+                f"📨 Active subscribers: {stats['active_subscribers']}\n"
+                f"❌ API failures: {stats['api_failures']}"
+            )
+        else:
+            text = "Stats unavailable. Check logs."
+        _reply(chat_id, text)
 
     else:
         _reply(chat_id, format_help())
@@ -226,7 +245,10 @@ def _handle_callback(callback_query):
 
     save_session(user_id, topic_label, shlokas)
 
-    interpretation = get_ai_interpretation(topic_label, shlokas[:1]) if shlokas else ""
+    send_chat_action(chat_id, 'typing')
+    interpretation = get_contextual_interpretation(topic_label, shlokas) if shlokas else ""
+    if not interpretation:
+        interpretation = get_ai_interpretation(topic_label, shlokas[:1])
     response = format_shloka_list(shlokas, interpretation)
     if len(shlokas) > 1:
         response += "\n\n👉 'और' भेजें अगला श्लोक देखने के लिए"

@@ -3,6 +3,7 @@
 import json
 import logging
 from config import DATA_DIR, GOOGLE_API_KEY
+from services.metrics import log_event
 
 logger = logging.getLogger('gitagpt.interpretation')
 
@@ -68,11 +69,13 @@ def _generate(client, prompt: str, max_tokens: int) -> str | None:
                 return text
         except Exception as e:
             if '429' in str(e) or 'RESOURCE_EXHAUSTED' in str(e):
+                log_event('api_error', data=f'gemini_429_{model}')
                 logger.warning(f"{model} quota exhausted, trying fallback...")
                 continue
+            log_event('api_error', data=f'gemini_error_{model}')
             logger.error(f"Gemini error ({model}): {e}")
             return None
-    logger.error("All Gemini models exhausted")
+    log_event('api_error', data='gemini_all_exhausted')
     return None
 
 

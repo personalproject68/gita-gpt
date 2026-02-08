@@ -9,6 +9,7 @@ TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 COHERE_API_KEY = os.environ.get('COHERE_API_KEY')
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 DAILY_PUSH_SECRET = os.environ.get('DAILY_PUSH_SECRET')
+ADMIN_USER_ID = os.environ.get('ADMIN_USER_ID', '598684231')
 PORT = int(os.environ.get('PORT', 5000))
 
 # Paths

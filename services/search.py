@@ -4,6 +4,7 @@ import os
 import logging
 from models.shloka import SHLOKAS, SHLOKA_LOOKUP, CURATED_TOPICS, TOPIC_INDEX
 from config import DATA_DIR
+from services.metrics import log_event
 
 logger = logging.getLogger('gitagpt.search')
 
@@ -53,6 +54,11 @@ class SemanticSearch:
             logger.error(f"Semantic search init error: {e}")
             return False
 
+    # Chapter 1 is narrative (battlefield description), not spiritual advice
+    SKIP_CHAPTERS = {'1'}
+    # Distance threshold — above this, results are too weak to trust
+    MAX_DISTANCE = 0.40
+
     def search(self, query: str, n_results: int = 3) -> list[str]:
         if not self._init_lazy():
             return []
@@ -66,16 +72,34 @@ class SemanticSearch:
             )
             query_embedding = response.embeddings[0]
 
+            # Fetch extra results to account for filtering
             results = self.collection.query(
                 query_embeddings=[query_embedding],
-                n_results=n_results,
+                n_results=n_results + 10,
                 include=["distances"],
             )
 
-            if results and results['ids']:
-                return results['ids'][0]
-            return []
+            if not results or not results['ids']:
+                return []
+
+            filtered = []
+            for sid, dist in zip(results['ids'][0], results['distances'][0]):
+                if dist > self.MAX_DISTANCE:
+                    continue
+                chapter = sid.split('.')[0]
+                if chapter in self.SKIP_CHAPTERS:
+                    continue
+                filtered.append(sid)
+                if len(filtered) >= n_results:
+                    break
+
+            if filtered:
+                logger.info(f"[Semantic] {filtered} (best dist: {results['distances'][0][0]:.4f})")
+            else:
+                logger.info(f"[Semantic] No good matches (best dist: {results['distances'][0][0]:.4f})")
+            return filtered
         except Exception as e:
+            log_event('api_error', data=f'cohere_error')
             logger.error(f"Semantic search error: {e}")
             return []
 
