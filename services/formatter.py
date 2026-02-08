@@ -177,3 +177,55 @@ def format_content_blocked(reason: str) -> str:
 
 def format_invalid_input() -> str:
     return "🙏 कृपया अपना प्रश्न लिखें।\n\nमदद के लिए /help भेजें।"
+
+
+def format_journey_shloka(shloka: dict, interpretation: str, position: int, total: int = 701, chapter_name: str = "") -> str:
+    """Format a journey shloka with progress line."""
+    shabdarth, bhavarth, guidance = _parse_interpretation(interpretation)
+
+    chapter = shloka.get('chapter', '')
+    parts = [
+        f"📿 गीता यात्रा — श्लोक {position + 1}/{total}",
+        f"अध्याय {chapter} — {chapter_name}",
+        "",
+        shloka['sanskrit'],
+    ]
+
+    if shabdarth:
+        parts.extend(["", f"📖 {shabdarth}"])
+
+    if bhavarth:
+        parts.extend(["", bhavarth])
+    else:
+        parts.extend(["", _strip_verse_ref(shloka['hindi_meaning'])])
+
+    commentary = _strip_verse_ref(shloka.get('hindi_commentary', ''))
+    if commentary:
+        parts.extend(["", f"📜 {_trim_commentary(commentary)}"])
+
+    if guidance:
+        parts.extend(["", f"💭 {guidance}"])
+
+    parts.extend(["", "— गीता GPT 🙏"])
+
+    return '\n'.join(parts)
+
+
+def format_chapter_milestone(chapter: int, chapter_name: str, position: int, total: int, next_chapter: int, next_chapter_name: str) -> str:
+    """Format chapter completion celebration."""
+    parts = [f"🎉 अध्याय {chapter} पूर्ण! ({chapter_name})"]
+    parts.append(f"आपने {position + 1}/{total} श्लोक पढ़े।")
+    if next_chapter <= 18 and next_chapter_name:
+        parts.append(f"अगला: अध्याय {next_chapter} — {next_chapter_name}")
+    return '\n'.join(parts)
+
+
+def format_journey_complete() -> str:
+    """Format journey completion congratulation."""
+    return """🎉 बधाई हो! आपने सम्पूर्ण श्रीमद्भगवद्गीता की यात्रा पूर्ण की!
+
+📿 701 श्लोक — 18 अध्याय
+
+गीता का ज्ञान सदा आपके साथ रहे। 🙏
+
+— गीता GPT 🙏"""

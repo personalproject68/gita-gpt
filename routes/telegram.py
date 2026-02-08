@@ -10,17 +10,17 @@ from config import TOPIC_MENU, ADMIN_USER_ID
 from services.telegram_api import send_message, send_chat_action, answer_callback_query, get_file, download_file
 from services.search import find_relevant_shlokas
 from services.ai_interpretation import (
-    get_ai_interpretation, get_contextual_interpretation, get_daily_interpretation
+    get_ai_interpretation, get_contextual_interpretation,
 )
 from services.session import get_session, save_session, update_context, update_top_topics
 from services.formatter import (
     format_shloka_list, format_welcome, format_help,
-    format_topic_keyboard, format_daily_shloka, format_shloka,
+    format_topic_keyboard, format_shloka,
     format_rate_limit, format_content_blocked, format_invalid_input,
 )
-from models.shloka import CURATED_TOPICS, SHLOKA_LOOKUP, get_daily_shloka
+from models.shloka import CURATED_TOPICS, SHLOKA_LOOKUP
 from services.voice import transcribe_voice
-from services.daily import subscribe, unsubscribe
+from services.daily import subscribe, unsubscribe, get_journey_position, advance_journey, send_journey_shloka
 from services.metrics import get_daily_stats
 from guardrails.rate_limiter import check_rate_limit
 from guardrails.content_filter import check_content
@@ -98,10 +98,9 @@ def _handle_command(chat_id, text):
 
     elif cmd == '/daily':
         send_chat_action(chat_id, 'typing')
-        shloka = get_daily_shloka()
-        save_session(user_id, 'daily', [shloka])
-        interpretation = get_daily_interpretation(shloka)
-        _reply(chat_id, format_daily_shloka(shloka, interpretation))
+        position = get_journey_position(user_id)
+        message, markup = send_journey_shloka(user_id, position)
+        _reply(chat_id, message, markup)
 
     elif cmd == '/stats':
         if user_id != ADMIN_USER_ID:
@@ -168,10 +167,9 @@ def _handle_text(chat_id, message):
 
     if msg_lower in ['daily', 'आज का श्लोक', 'प्रेरणा', 'aaj', 'आज']:
         send_chat_action(chat_id, 'typing')
-        shloka = get_daily_shloka()
-        save_session(user_id, 'daily', [shloka])
-        interpretation = get_daily_interpretation(shloka)
-        _reply(chat_id, format_daily_shloka(shloka, interpretation))
+        position = get_journey_position(user_id)
+        message, markup = send_journey_shloka(user_id, position)
+        _reply(chat_id, message, markup)
         return
 
     if msg_lower in ['और', 'more', 'aur', 'next']:
@@ -223,6 +221,15 @@ def _handle_callback(callback_query):
     user_id = str(chat_id)
 
     answer_callback_query(cb_id)
+
+    # Journey: "अगला श्लोक →" button
+    if data == 'journey:next':
+        logger.info(f"Journey advance by {user_id}")
+        send_chat_action(chat_id, 'typing')
+        new_pos = advance_journey(user_id)
+        message, markup = send_journey_shloka(user_id, new_pos)
+        _reply(chat_id, message, markup)
+        return
 
     if not data.startswith('topic:'):
         return

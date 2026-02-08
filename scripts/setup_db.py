@@ -50,9 +50,16 @@ def setup_database():
         CREATE TABLE IF NOT EXISTS subscribers (
             user_id TEXT PRIMARY KEY,
             subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            active INTEGER DEFAULT 1
+            active INTEGER DEFAULT 1,
+            journey_position INTEGER DEFAULT 0
         )
     ''')
+
+    # Migration: add journey_position if table already exists without it
+    try:
+        cursor.execute('ALTER TABLE subscribers ADD COLUMN journey_position INTEGER DEFAULT 0')
+    except sqlite3.OperationalError:
+        pass  # Column already exists
 
     conn.commit()
     conn.close()
