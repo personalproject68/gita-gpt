@@ -1,8 +1,18 @@
 """Telegram response formatting - forward-friendly."""
 
+import re
 from datetime import datetime
 from config import TOPIC_MENU
 from services.telegram_api import make_inline_keyboard
+
+
+def _strip_verse_ref(text: str) -> str:
+    """Strip ।।X.Y।। verse reference prefixes and व्याख्या-- labels."""
+    if not text:
+        return text
+    text = re.sub(r'^[।॥\s]*\d+\.\d+[।॥\s]*', '', text).strip()
+    text = re.sub(r'^व्याख्या\s*[-—–]+\s*', '', text).strip()
+    return text
 
 
 def _trim_commentary(text: str, max_len: int = 300) -> str:
@@ -19,10 +29,14 @@ def _trim_commentary(text: str, max_len: int = 300) -> str:
 
 
 def _parse_interpretation(interpretation: str) -> tuple[str, str, str]:
-    """Parse Gemini's --- separated output into (shabdarth, bhavarth, guidance).
-    Returns empty strings for missing parts."""
+    """Parse Gemini's [SECTION] separated output into (shabdarth, bhavarth, guidance).
+    If no [SECTION] found (pre-fetched), treat as bhavarth only."""
     if not interpretation:
         return "", "", ""
+
+    if '[SECTION]' not in interpretation:
+        # Pre-fetched interpretation — use as bhavarth, skip shabdarth
+        return "", _strip_verse_ref(interpretation), ""
 
     parts = [p.strip() for p in interpretation.split('[SECTION]')]
     shabdarth = parts[0] if len(parts) > 0 else ""
@@ -47,9 +61,9 @@ def format_shloka(shloka: dict, interpretation: str = "") -> str:
     if bhavarth:
         parts.extend(["", bhavarth])
     else:
-        parts.extend(["", shloka['hindi_meaning']])
+        parts.extend(["", _strip_verse_ref(shloka['hindi_meaning'])])
 
-    commentary = shloka.get('hindi_commentary', '')
+    commentary = _strip_verse_ref(shloka.get('hindi_commentary', ''))
     if commentary:
         parts.extend(["", f"📜 {_trim_commentary(commentary)}"])
 
@@ -134,9 +148,9 @@ def format_daily_shloka(shloka: dict, interpretation: str = "") -> str:
     if bhavarth:
         parts.extend(["", bhavarth])
     else:
-        parts.extend(["", shloka['hindi_meaning']])
+        parts.extend(["", _strip_verse_ref(shloka['hindi_meaning'])])
 
-    commentary = shloka.get('hindi_commentary', '')
+    commentary = _strip_verse_ref(shloka.get('hindi_commentary', ''))
     if commentary:
         parts.extend(["", f"📜 {_trim_commentary(commentary)}"])
 
