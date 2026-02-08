@@ -76,82 +76,86 @@ def _generate(client, prompt: str, max_tokens: int) -> str | None:
     return None
 
 
+_SHABDARTH_PROMPT = """आप श्रीमद्भगवद्गीता के विद्वान हैं। नीचे दिए गए श्लोक के लिए ठीक इस format में output दें।
+
+श्लोक:
+{sanskrit}
+
+अर्थ: {hindi_meaning}
+{commentary}
+व्यक्ति का प्रश्न: "{user_query}"
+
+कृपया नीचे दिए गए तीन भाग लिखें, हर भाग को "---" से अलग करें:
+
+भाग 1 — शब्दार्थ: संस्कृत के हर मुख्य शब्द/पद का हिंदी अर्थ, pipe (|) से अलग।
+उदाहरण: यदा यदा = जब-जब | धर्मस्य = धर्म की | ग्लानिः = हानि
+
+भाग 2 — भावार्थ: श्लोक का सरल हिंदी अर्थ (1-2 वाक्य)। शुद्ध सरल हिंदी।
+
+भाग 3 — मार्गदर्शन: व्यक्ति के प्रश्न के संदर्भ में गीता की शिक्षा को जोड़ते हुए सहज, गरिमापूर्ण मार्गदर्शन (2-3 वाक्य)।
+टोन: शांत, सम्मानजनक। "आप" का प्रयोग। Hinglish/अंग्रेज़ी से बचें।
+
+बिल्कुल न लिखें: कोई heading, label, श्लोक संख्या, या "शब्दार्थ:", "भावार्थ:" जैसे prefix।
+सिर्फ content लिखें, --- से अलग करें।"""
+
+
+_DAILY_PROMPT = """आप श्रीमद्भगवद्गीता के विद्वान हैं। आज के दैनिक श्लोक के लिए ठीक इस format में output दें।
+
+श्लोक:
+{sanskrit}
+
+अर्थ: {hindi_meaning}
+{commentary}
+
+कृपया नीचे दिए गए तीन भाग लिखें, हर भाग को "---" से अलग करें:
+
+भाग 1 — शब्दार्थ: संस्कृत के हर मुख्य शब्द/पद का हिंदी अर्थ, pipe (|) से अलग।
+उदाहरण: यदा यदा = जब-जब | धर्मस्य = धर्म की | ग्लानिः = हानि
+
+भाग 2 — भावार्थ: श्लोक का सरल हिंदी अर्थ (1-2 वाक्य)। शुद्ध सरल हिंदी।
+
+भाग 3 — आज का चिंतन: इस श्लोक से जुड़ा एक प्रेरणादायक विचार जो पूरे दिन साथ रहे (2-3 वाक्य)।
+टोन: शांत, सम्मानजनक, प्रेरक। "आप" का प्रयोग। Hinglish/अंग्रेज़ी से बचें।
+
+बिल्कुल न लिखें: कोई heading, label, श्लोक संख्या, या "शब्दार्थ:", "भावार्थ:" जैसे prefix।
+सिर्फ content लिखें, --- से अलग करें।"""
+
+
 def get_contextual_interpretation(user_query: str, shlokas: list[dict]) -> str | None:
-    """Generate broad Gita context and solutions from multiple shlokas.
-    Returns Hindi interpretation (broad context + solution) or None on failure.
-    """
+    """Generate shabdarth + bhavarth + contextual guidance for user's question."""
     client = _get_gemini_client()
     if not client or not shlokas:
         return None
 
-    # Prepare shlokas for prompt context
-    shloka_context = ""
-    for s in shlokas:
-        # Use a summary or first part of commentary for more depth if available
-        comm_excerpt = s.get('hindi_commentary', '')[:1500] 
-        shloka_context += f"--- श्रीमद्भगवद्गीता {s['shloka_id']} ---\n"
-        shloka_context += f"संस्कृत: {s['sanskrit']}\n"
-        shloka_context += f"अर्थ (Meaning): {s['hindi_meaning']}\n"
-        if comm_excerpt:
-            shloka_context += f"व्याख्या (Detailed Commentary): {comm_excerpt}...\n"
-        shloka_context += "\n"
+    s = shlokas[0]
+    commentary = ""
+    if s.get('hindi_commentary'):
+        commentary = f"व्याख्या: {s['hindi_commentary'][:1500]}"
 
-    prompt = f"""आप श्रीमद्भगवद्गीता के एक अत्यंत सौम्य, गंभीर और सम्मानजनक मार्गदर्शक हैं। आपकी भाषा 'सुबोध' (सरल) है, लेकिन उसमें मर्यादा और ठहराव है। आप किसी विद्वान की तरह भारी शब्द नहीं बोलते, बल्कि एक ऐसे गहरे मित्र की तरह बात करते हैं जो जीवन के सार को बड़ी सरलता से समझा देता है।
-
-एक व्यक्ति ने आपसे यह प्रश्न पूछा है:
-"{user_query}"
-
-उनके समाधान के लिए गीता के ये सूत्र उपलब्ध हैं:
-{shloka_context}
-
-कृपया एक मर्यादित और सरल संदेश लिखें (6-8 पंक्तियाँ):
-
-1. **भाव को समझना (Respectful Acknowledgment):** बात की शुरुआत सम्मान के साथ करें। उन्हें महसूस कराएं कि आप उनके विचारों का आदर करते हैं। (उदा: "आपके मन के इस भाव को मैं समझ पा रहा हूँ...", "यह जीवन की एक स्वाभाविक स्थिति है...")।
-
-2. **सरल और गहरा मर्म (Subodh Wisdom):** गीता के ज्ञान को 'सरल और सात्विक' हिंदी में समझाएं। 
-   - **नियम:** बहुत कठिन शब्दों (सांख्य, निवृत्ति, द्वंद्व) से बचें।
-   - **मर्यादा:** 'तू', 'बेटा', 'मम्मी-पापा' जैसे अत्यधिक अनौपचारिक शब्दों का प्रयोग **बिल्कुल न करें**। 'Hinglish' से बचें, शुद्ध लेकिन बोलचाल की 'सरल हिंदी' का प्रयोग करें। 
-   - **शालीनता:** 'आसक्ति' की जगह 'मोह' या 'लगाव', 'अनित्य' की जगह 'परिवर्तनशील' जैसे शब्दों का प्रयोग करें जो सहज हों।
-
-3. **आज का विचार (Contemplative Suggestion):** उन्हें कोई चंचल काम करने को न कहें। बल्कि एक गहरा विचार दें जिस पर वो मनन कर सकें (उदा: "आज केवल इस बात पर विचार करें कि परमात्मा सदैव आपके साथ हैं", "कुछ पल के लिए मौन रहकर अपनी सांसों पर ध्यान दें")।
-
-निर्देश:
-- संबोधन: "प्रिय आत्मन्" या "आदरणीय" (यदि उचित लगे)। हमेशा "आप" का प्रयोग करें।
-- टोन: गंभीर (Mature), शांत (Calm) और गरिमापूर्ण (Dignified)।
-- **बिल्कुल न लिखें:** श्लोक संख्या, संस्कृत शब्द, या कोई हेडिंग।"""
+    prompt = _SHABDARTH_PROMPT.format(
+        sanskrit=s['sanskrit'],
+        hindi_meaning=s['hindi_meaning'],
+        commentary=commentary,
+        user_query=user_query,
+    )
 
     return _generate(client, prompt, max_tokens=1000)
 
 
 def get_daily_interpretation(shloka: dict) -> str | None:
-    """Generate a daily inspirational message based on a shloka for push notifications."""
+    """Generate shabdarth + bhavarth + daily thought for push notifications."""
     client = _get_gemini_client()
     if not client:
         return None
 
-    shloka_context = f"--- श्रीमद्भगवद्गीता {shloka['shloka_id']} ---\n"
-    shloka_context += f"संस्कृत: {shloka['sanskrit']}\n"
-    shloka_context += f"अर्थ (Meaning): {shloka['hindi_meaning']}\n"
+    commentary = ""
     if shloka.get('hindi_commentary'):
-        shloka_context += f"व्याख्या: {shloka['hindi_commentary'][:1500]}...\n"
+        commentary = f"व्याख्या: {shloka['hindi_commentary'][:1500]}"
 
-    prompt = f"""आप श्रीमद्भगवद्गीता के एक अत्यंत सौम्य, गंभीर और सम्मानजनक मार्गदर्शक हैं। आज के दिन के लिए आपको एक 'प्रेरणादायक विचार' (Thought of the Day) साझा करना है।
-
-आज का श्लोक यह है:
-{shloka_context}
-
-कृपया एक मर्यादित और गरिमापूर्ण संदेश लिखें (5-6 पंक्तियाँ):
-
-1. **आज का मंगल संदेश (Greeting/Context):** एक शांत और सकारात्मक शुरुआत करें। (उदा: "आज के इस पावन प्रभात पर...", "आज का दिन हमारे लिए एक नया अवसर है...")
-
-2. **मर्म (Simple Wisdom):** इस श्लोक के सार को 'सरल और सात्विक' हिंदी में समझाएं। इसे ऐसे कहें कि सामने वाले को जीवन में एक दिशा मिले। 
-   - **नियम:** 'तू', 'बेटा', 'Hinglish' या बहुत कठिन शब्दों का प्रयोग न करें। "आप" और सम्मानजनक भाषा का प्रयोग करें।
-
-3. **आज का चिंतन (A Thought to Carry):** एक ऐसा विचार दें जिसे वो पूरे दिन अपने साथ रख सकें।
-
-निर्देश:
-- संबोधन: "प्रिय आत्मन्"
-- टोन: गंभीर, शांत और प्रेरक।
-- **बिल्कुल न लिखें:** श्लोक संख्या, संस्कृत शब्द, या कोई हेडिंग।"""
+    prompt = _DAILY_PROMPT.format(
+        sanskrit=shloka['sanskrit'],
+        hindi_meaning=shloka['hindi_meaning'],
+        commentary=commentary,
+    )
 
     return _generate(client, prompt, max_tokens=1000)

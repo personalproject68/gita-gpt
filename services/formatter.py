@@ -5,24 +5,41 @@ from config import TOPIC_MENU
 from services.telegram_api import make_inline_keyboard
 
 
-def format_shloka(shloka: dict, interpretation: str = "") -> str:
-    """Format a single shloka for Telegram (AI interpretation first)."""
-    parts = []
-    
-    # 1. AI Interpretation first (per user request)
-    if interpretation:
-        parts.extend([interpretation, ""])
+def _parse_interpretation(interpretation: str) -> tuple[str, str, str]:
+    """Parse Gemini's --- separated output into (shabdarth, bhavarth, guidance).
+    Returns empty strings for missing parts."""
+    if not interpretation:
+        return "", "", ""
 
-    # 2. Shloka details
-    parts.extend([
+    parts = [p.strip() for p in interpretation.split('---')]
+    shabdarth = parts[0] if len(parts) > 0 else ""
+    bhavarth = parts[1] if len(parts) > 1 else ""
+    guidance = parts[2] if len(parts) > 2 else ""
+    return shabdarth, bhavarth, guidance
+
+
+def format_shloka(shloka: dict, interpretation: str = "") -> str:
+    """Format a single shloka for Telegram with shabdarth + bhavarth + guidance."""
+    shabdarth, bhavarth, guidance = _parse_interpretation(interpretation)
+
+    parts = [
         f"📿 गीता {shloka['shloka_id']}",
         "",
         shloka['sanskrit'],
-        "",
-        f"💡 {shloka['hindi_meaning']}",
-        "",
-        "— गीता GPT 🙏"
-    ])
+    ]
+
+    if shabdarth:
+        parts.extend(["", f"📖 {shabdarth}"])
+
+    if bhavarth:
+        parts.extend(["", bhavarth])
+    else:
+        parts.extend(["", shloka['hindi_meaning']])
+
+    if guidance:
+        parts.extend(["", f"💭 {guidance}"])
+
+    parts.extend(["", "— गीता GPT 🙏"])
 
     return '\n'.join(parts)
 
@@ -84,21 +101,28 @@ def format_daily_shloka(shloka: dict, interpretation: str = "") -> str:
     days_hi = ['सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार', 'रविवार']
     day_name = days_hi[datetime.now().weekday()]
 
-    parts = []
-    if interpretation:
-        parts.extend([interpretation, ""])
-    
-    parts.extend([
+    shabdarth, bhavarth, guidance = _parse_interpretation(interpretation)
+
+    parts = [
         f"🌅 {day_name} का गीता प्रेरणा",
         "",
         f"📿 गीता {shloka['shloka_id']}",
         "",
         shloka['sanskrit'],
-        "",
-        f"💡 {shloka['hindi_meaning']}",
-        "",
-        "— गीता GPT 🙏"
-    ])
+    ]
+
+    if shabdarth:
+        parts.extend(["", f"📖 {shabdarth}"])
+
+    if bhavarth:
+        parts.extend(["", bhavarth])
+    else:
+        parts.extend(["", shloka['hindi_meaning']])
+
+    if guidance:
+        parts.extend(["", f"💭 {guidance}"])
+
+    parts.extend(["", "— गीता GPT 🙏"])
 
     return '\n'.join(parts)
 
