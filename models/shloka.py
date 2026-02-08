@@ -63,7 +63,22 @@ def get_daily_shloka(topic: str = None) -> dict:
         if valid:
             return SHLOKA_LOOKUP[random.choice(valid)]
 
-    famous_ids = ['2.47', '2.14', '2.22', '2.27', '3.35', '4.7', '6.5', '9.22', '18.66']
+    famous_ids = [
+        # Chapter 2 — Sankhya Yoga (foundational wisdom)
+        '2.7', '2.11', '2.13', '2.14', '2.20', '2.22', '2.27', '2.47', '2.62', '2.70',
+        # Chapter 3 — Karma Yoga
+        '3.21', '3.27', '3.35',
+        # Chapter 4 — Jnana Yoga
+        '4.7', '4.8', '4.34', '4.38',
+        # Chapter 6 — Dhyana Yoga
+        '6.5', '6.6', '6.34',
+        # Chapter 9 — Raja Vidya
+        '9.22', '9.26', '9.27',
+        # Chapter 11-15
+        '11.32', '12.13', '15.7',
+        # Chapter 18 — Moksha Sannyasa
+        '18.20', '18.46', '18.63', '18.66',
+    ]
     valid = [sid for sid in famous_ids if sid in SHLOKA_LOOKUP]
     # Cycle through shlokas by date — same shloka for everyone on a given day
     index = date.today().toordinal() % len(valid)
