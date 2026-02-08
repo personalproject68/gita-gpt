@@ -7,10 +7,10 @@ from services.telegram_api import make_inline_keyboard
 
 
 def _strip_verse_ref(text: str) -> str:
-    """Strip ।।X.Y।। verse reference prefixes and व्याख्या-- labels."""
+    """Strip ।।X.Y।। or ।।X.Y -- X.Z।। verse reference prefixes and व्याख्या-- labels."""
     if not text:
         return text
-    text = re.sub(r'^[।॥\s]*\d+\.\d+[।॥\s]*', '', text).strip()
+    text = re.sub(r'^[।॥\s]*\d+\.\d+(\s*[-—–]+\s*\d+\.\d+)?[।॥\s]*', '', text).strip()
     text = re.sub(r'^व्याख्या\s*[-—–]+\s*', '', text).strip()
     return text
 
