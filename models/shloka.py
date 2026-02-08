@@ -2,6 +2,7 @@
 
 import json
 import random
+from datetime import date
 from config import DATA_DIR
 
 def load_shlokas():
@@ -64,4 +65,6 @@ def get_daily_shloka(topic: str = None) -> dict:
 
     famous_ids = ['2.47', '2.14', '2.22', '2.27', '3.35', '4.7', '6.5', '9.22', '18.66']
     valid = [sid for sid in famous_ids if sid in SHLOKA_LOOKUP]
-    return SHLOKA_LOOKUP[random.choice(valid)]
+    # Cycle through shlokas by date — same shloka for everyone on a given day
+    index = date.today().toordinal() % len(valid)
+    return SHLOKA_LOOKUP[valid[index]]
