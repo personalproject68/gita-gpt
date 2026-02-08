@@ -11,7 +11,7 @@ def _parse_interpretation(interpretation: str) -> tuple[str, str, str]:
     if not interpretation:
         return "", "", ""
 
-    parts = [p.strip() for p in interpretation.split('---')]
+    parts = [p.strip() for p in interpretation.split('[SECTION]')]
     shabdarth = parts[0] if len(parts) > 0 else ""
     bhavarth = parts[1] if len(parts) > 1 else ""
     guidance = parts[2] if len(parts) > 2 else ""
