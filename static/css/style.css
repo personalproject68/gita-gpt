@@ -132,11 +132,20 @@ body {
 
 /* === Header === */
 .header {
-    padding: 0.5rem 0;
+    padding: 0.4rem 0 0.3rem;
     position: sticky;
     top: 0;
     background: var(--bg-deep);
     z-index: 10;
+}
+
+.header-brand {
+    font-family: var(--font-serif);
+    font-size: 0.85rem;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.05em;
+    padding-bottom: 0.2rem;
 }
 
 .nav {
