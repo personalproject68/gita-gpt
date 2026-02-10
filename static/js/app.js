@@ -35,12 +35,6 @@
         app.classList.add('visible');
     }, 800);
 
-    // === Compact header on scroll (hide title, keep slim nav only) ===
-    const header = document.querySelector('.header');
-    window.addEventListener('scroll', () => {
-        header.classList.toggle('compact', window.scrollY > 30);
-    }, { passive: true });
-
     // === Auth — Profile button + login banner ===
     const profileBtn = document.getElementById('profileBtn');
     const journeyLoginBanner = document.getElementById('journeyLoginBanner');

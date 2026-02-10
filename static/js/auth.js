@@ -208,6 +208,9 @@ const GitaAuth = {
             profileBtn.textContent = loggedIn ? '👤' : 'लॉगिन';
             profileBtn.classList.toggle('logged-in', loggedIn);
         }
+        // Also update journey login banner if visible
+        const banner = document.getElementById('journeyLoginBanner');
+        if (banner) banner.classList.toggle('hidden', loggedIn);
     },
 
     async init() {
