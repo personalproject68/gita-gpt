@@ -138,6 +138,11 @@ body {
     top: 0;
     background: var(--bg-deep);
     z-index: 10;
+    transition: padding 0.25s ease;
+}
+
+.header.compact {
+    padding: 0.4rem 0 0.4rem;
 }
 
 .header-title {
@@ -146,6 +151,12 @@ body {
     color: var(--gold);
     font-weight: 700;
     margin-bottom: 0.75rem;
+    transition: font-size 0.25s ease, margin-bottom 0.25s ease;
+}
+
+.header.compact .header-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.35rem;
 }
 
 .nav {
@@ -154,6 +165,12 @@ body {
     background: var(--bg-card);
     border-radius: 14px;
     padding: 5px;
+    transition: padding 0.25s ease, border-radius 0.25s ease;
+}
+
+.header.compact .nav {
+    border-radius: 10px;
+    padding: 3px;
 }
 
 .nav-btn {
@@ -168,6 +185,11 @@ body {
     border-radius: 11px;
     cursor: pointer;
     transition: all 0.25s ease;
+}
+
+.header.compact .nav-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.9rem;
 }
 
 .nav-btn.active {

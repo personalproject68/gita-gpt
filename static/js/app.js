@@ -35,6 +35,12 @@
         app.classList.add('visible');
     }, 800);
 
+    // === Compact header on scroll ===
+    const header = document.querySelector('.header');
+    window.addEventListener('scroll', () => {
+        header.classList.toggle('compact', window.scrollY > 40);
+    }, { passive: true });
+
     // === Navigation ===
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
