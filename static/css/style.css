@@ -142,12 +142,11 @@ body {
 }
 
 .header.compact {
-    padding: 0.4rem 0 0.4rem;
+    padding: 0.25rem 0;
 }
 
-.header.header-hidden {
-    transform: translateY(-100%);
-    pointer-events: none;
+.header.compact .header-title {
+    display: none;
 }
 
 .header-title {
@@ -157,11 +156,6 @@ body {
     font-weight: 700;
     margin-bottom: 0.75rem;
     transition: font-size 0.25s ease, margin-bottom 0.25s ease;
-}
-
-.header.compact .header-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.35rem;
 }
 
 .nav {

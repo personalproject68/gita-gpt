@@ -35,18 +35,10 @@
         app.classList.add('visible');
     }, 800);
 
-    // === Auto-hide header on scroll down, show on scroll up ===
+    // === Compact header on scroll (hide title, keep slim nav only) ===
     const header = document.querySelector('.header');
-    let lastScrollY = 0;
     window.addEventListener('scroll', () => {
-        const y = window.scrollY;
-        if (y > 40) {
-            header.classList.add('compact');
-            header.classList.toggle('header-hidden', y > lastScrollY && y > 100);
-        } else {
-            header.classList.remove('compact', 'header-hidden');
-        }
-        lastScrollY = y;
+        header.classList.toggle('compact', window.scrollY > 30);
     }, { passive: true });
 
     // === Navigation ===
