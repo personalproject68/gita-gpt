@@ -11,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping health endpoint
-        run: curl -fsS --max-time 10 https://gita-gpt-gita-fbd4d652.koyeb.app/health || true
+        run: curl -fsS --max-time 10 https://gita-sarathi-gita-287de6b7.koyeb.app/health || true

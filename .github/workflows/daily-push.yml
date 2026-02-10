@@ -13,4 +13,4 @@ jobs:
       - name: Trigger daily shloka push
         run: |
           curl -fsS -X POST --max-time 30 \
-            "https://gita-gpt-gita-fbd4d652.koyeb.app/daily-push?secret=${{ secrets.DAILY_PUSH_SECRET }}"
+            "https://gita-sarathi-gita-287de6b7.koyeb.app/daily-push?secret=${{ secrets.DAILY_PUSH_SECRET }}"

@@ -4,7 +4,7 @@ import os
 import logging
 from flask import Blueprint, request, jsonify
 from services.search import find_relevant_shlokas
-from services.ai_interpretation import get_ai_interpretation
+from services.ai_interpretation import get_ai_interpretation, get_contextual_interpretation
 from services.daily import send_daily_push
 from models.shloka import (
     SHLOKA_LOOKUP, COMPLETE_LOOKUP, COMPLETE_SHLOKAS, CHAPTER_NAMES,
@@ -26,7 +26,14 @@ def ask():
         return jsonify({'error': 'Please provide ?q=your question'}), 400
 
     shlokas = find_relevant_shlokas(query)
-    interpretation = get_ai_interpretation(query, shlokas[:1]) if shlokas else ''
+
+    # Try Gemini contextual interpretation (query-specific margdarshan)
+    # Fall back to pre-fetched interpretation if Gemini unavailable
+    interpretation = ''
+    if shlokas:
+        interpretation = get_contextual_interpretation(query, shlokas[:1])
+        if not interpretation:
+            interpretation = get_ai_interpretation(query, shlokas[:1])
 
     return jsonify({
         'query': query,
