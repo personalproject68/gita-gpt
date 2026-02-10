@@ -10,6 +10,8 @@ COHERE_API_KEY = os.environ.get('COHERE_API_KEY')
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 DAILY_PUSH_SECRET = os.environ.get('DAILY_PUSH_SECRET')
 ADMIN_USER_ID = os.environ.get('ADMIN_USER_ID', '598684231')
+MSG91_AUTH_KEY = os.environ.get('MSG91_AUTH_KEY')
+MSG91_TEMPLATE_ID = os.environ.get('MSG91_TEMPLATE_ID')
 PORT = int(os.environ.get('PORT', 5000))
 
 # Paths

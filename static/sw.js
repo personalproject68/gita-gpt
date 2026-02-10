@@ -1,10 +1,11 @@
-const CACHE_NAME = 'gitasarathi-v4';
+const CACHE_NAME = 'gitasarathi-v5';
 const STATIC_ASSETS = [
     '/',
     '/static/css/style.css',
     '/static/js/app.js',
     '/static/js/voice.js',
     '/static/js/api.js',
+    '/static/js/auth.js',
     '/static/manifest.json',
 ];
 

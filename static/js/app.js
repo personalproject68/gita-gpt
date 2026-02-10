@@ -41,6 +41,39 @@
         header.classList.toggle('compact', window.scrollY > 30);
     }, { passive: true });
 
+    // === Auth — Profile button + login banner ===
+    const profileBtn = document.getElementById('profileBtn');
+    const journeyLoginBanner = document.getElementById('journeyLoginBanner');
+    const journeyLoginBtn = document.getElementById('journeyLoginBtn');
+
+    profileBtn.addEventListener('click', () => {
+        if (GitaAuth.isLoggedIn()) {
+            if (confirm('लॉगआउट करें?')) {
+                GitaAuth.logout();
+                GitaAuth._updateUI(false);
+                updateLoginBanner();
+            }
+        } else {
+            GitaAuth.showLoginModal();
+        }
+    });
+
+    journeyLoginBtn.addEventListener('click', () => {
+        GitaAuth.showLoginModal();
+    });
+
+    function updateLoginBanner() {
+        journeyLoginBanner.classList.toggle('hidden', GitaAuth.isLoggedIn());
+    }
+
+    window.addEventListener('gita-auth-change', () => {
+        updateLoginBanner();
+        if (journeyLoaded) loadJourney(); // refresh journey with synced data
+    });
+
+    // Init auth silently
+    GitaAuth.init().then(() => updateLoginBanner());
+
     // === Navigation ===
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -58,7 +91,10 @@
         currentScreen = name;
 
         if (name === 'amrit' && !amritData) loadAmrit();
-        if (name === 'journey' && !journeyLoaded) loadJourney();
+        if (name === 'journey') {
+            updateLoginBanner();
+            if (!journeyLoaded) loadJourney();
+        }
     }
 
     // === Voice ===
@@ -321,6 +357,10 @@
 
     function setJourneyPosition(pos) {
         localStorage.setItem('gita_journey_pos', String(pos));
+        // Sync to server if logged in
+        if (GitaAuth.isLoggedIn()) {
+            GitaAuth.syncJourney().catch(() => {});
+        }
     }
 
     function getStreak() {

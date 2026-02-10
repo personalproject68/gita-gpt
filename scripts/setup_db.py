@@ -61,6 +61,42 @@ def setup_database():
     except sqlite3.OperationalError:
         pass  # Column already exists
 
+    # === OTP Auth tables ===
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS web_users (
+            user_id TEXT PRIMARY KEY,
+            phone TEXT UNIQUE NOT NULL,
+            journey_position INTEGER DEFAULT 0,
+            journey_streak INTEGER DEFAULT 0,
+            journey_last_date TEXT,
+            top_topics TEXT DEFAULT '{}',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS web_sessions (
+            token TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES web_users(user_id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS otps (
+            phone TEXT NOT NULL,
+            request_id TEXT,
+            attempts INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    cursor.execute(
+        'CREATE INDEX IF NOT EXISTS idx_otps_phone_time ON otps(phone, created_at)'
+    )
+
     conn.commit()
     conn.close()
     print(f"Database initialized at {DB_PATH}")
