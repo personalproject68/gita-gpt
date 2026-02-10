@@ -79,13 +79,18 @@
             switch (status) {
                 case 'listening':
                     micBtn.classList.add('listening');
-                    micStatus.textContent = 'सुन रहे हैं...';
+                    micBtn.querySelector('.mic-icon-mic').classList.add('hidden');
+                    micBtn.querySelector('.mic-icon-stop').classList.remove('hidden');
+                    micStatus.textContent = '⬆ रोकने के लिए दबाएं';
                     break;
                 case 'interim':
-                    micStatus.textContent = data;
+                    queryInput.value = data;
+                    micStatus.textContent = '⬆ भेजने के लिए दबाएं';
                     break;
                 case 'stopped':
                     micBtn.classList.remove('listening');
+                    micBtn.querySelector('.mic-icon-mic').classList.remove('hidden');
+                    micBtn.querySelector('.mic-icon-stop').classList.add('hidden');
                     micStatus.textContent = '';
                     break;
                 case 'no-speech':
