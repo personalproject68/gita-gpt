@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4A0E0E">
+    <meta name="description" content="गीता GPT — अपनी समस्या बोलकर बताएं, गीता से मार्गदर्शन पाएं।">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>गीता GPT</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" href="/static/icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Opening Animation -->
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <div class="om-symbol">&#x0950;</div>
+            <div class="splash-glow"></div>
+            <div class="splash-title">गीता GPT</div>
+            <div class="splash-subtitle">गीता से जीवन का मार्गदर्शन</div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title" id="headerTitle">गीता GPT</div>
+            <nav class="nav">
+                <button class="nav-btn active" data-screen="home">प्रश्न</button>
+                <button class="nav-btn" data-screen="amrit">अमृत</button>
+                <button class="nav-btn" data-screen="journey">यात्रा</button>
+            </nav>
+        </header>
+
+        <!-- Home Screen -->
+        <main id="homeScreen" class="screen active">
+            <div class="home-prompt">
+                <p class="prompt-text">अपनी समस्या बोलकर बताएं</p>
+                <p class="prompt-sub">गीता से उत्तर मिलेगा</p>
+            </div>
+
+            <!-- Mic Button -->
+            <div class="mic-container">
+                <button id="micBtn" class="mic-btn" aria-label="बोलें">
+                    <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                    <div class="mic-pulse"></div>
+                </button>
+                <div id="micStatus" class="mic-status"></div>
+            </div>
+
+            <!-- Text Input -->
+            <div class="text-input-container">
+                <form id="queryForm" class="query-form">
+                    <input type="text" id="queryInput" class="query-input" placeholder="यहाँ लिखें..." autocomplete="off">
+                    <button type="submit" class="send-btn" aria-label="भेजें">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Result Area -->
+            <div id="resultArea" class="result-area hidden">
+                <div id="loadingIndicator" class="loading hidden">
+                    <div class="loading-glow"></div>
+                    <p class="loading-text">गीता में खोज रहे हैं...</p>
+                </div>
+                <div id="shlokaResult" class="shloka-result hidden"></div>
+            </div>
+        </main>
+
+        <!-- Amrit Shlokas Screen -->
+        <main id="amritScreen" class="screen hidden">
+            <div class="screen-header">
+                <h2 class="screen-title">अमृत श्लोक</h2>
+                <p class="screen-subtitle">गीता के 10 सबसे प्रसिद्ध श्लोक</p>
+            </div>
+            <div id="amritList" class="amrit-list"></div>
+        </main>
+
+        <!-- Journey Screen -->
+        <main id="journeyScreen" class="screen hidden">
+            <div class="screen-header">
+                <h2 class="screen-title">गीता यात्रा</h2>
+                <p class="screen-subtitle">सम्पूर्ण गीता, एक श्लोक प्रतिदिन</p>
+            </div>
+
+            <!-- Journey Stats -->
+            <div id="journeyStats" class="journey-stats">
+                <div class="journey-stat">
+                    <div class="stat-value" id="journeyPercent">0%</div>
+                    <div class="stat-label">पूर्ण</div>
+                </div>
+                <div class="journey-stat">
+                    <div class="stat-value" id="journeyStreak">0</div>
+                    <div class="stat-label">दिन लगातार</div>
+                </div>
+                <div class="journey-stat">
+                    <div class="stat-value" id="journeyTitle">जिज्ञासु</div>
+                    <div class="stat-label">उपाधि</div>
+                </div>
+            </div>
+
+            <!-- Overall Progress Bar -->
+            <div class="journey-progress-container">
+                <div class="journey-progress-bar">
+                    <div class="journey-progress-fill" id="journeyProgressFill"></div>
+                </div>
+                <div class="journey-progress-text" id="journeyProgressText">0 / 701 श्लोक</div>
+            </div>
+
+            <!-- Chapter Map -->
+            <div class="chapter-map" id="chapterMap"></div>
+
+            <!-- Current Shloka -->
+            <div id="journeyShloka" class="journey-shloka"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span>गीता GPT</span>
+        </footer>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/voice.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

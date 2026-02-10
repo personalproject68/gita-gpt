@@ -6,9 +6,12 @@ from flask import Blueprint, request, jsonify
 from services.search import find_relevant_shlokas
 from services.ai_interpretation import get_ai_interpretation
 from services.daily import send_daily_push
-from models.shloka import SHLOKA_LOOKUP, get_daily_shloka
+from models.shloka import (
+    SHLOKA_LOOKUP, COMPLETE_LOOKUP, COMPLETE_SHLOKAS, CHAPTER_NAMES,
+    get_daily_shloka, get_journey_shloka, get_chapter_info, is_chapter_complete,
+)
 from services.formatter import format_daily_shloka
-from config import DAILY_PUSH_SECRET
+from config import DAILY_PUSH_SECRET, AMRIT_SHLOKAS, TOPIC_MENU, DATA_DIR
 
 logger = logging.getLogger('gitagpt.api')
 
@@ -66,4 +69,109 @@ def get_shloka(shloka_id: str):
         'sanskrit': shloka['sanskrit'],
         'hindi_meaning': shloka['hindi_meaning'],
         'tags': shloka.get('tags', []),
+    })
+
+
+# --- PWA API Endpoints ---
+
+def _load_interpretations():
+    """Load pre-fetched interpretations."""
+    import json
+    path = DATA_DIR / 'interpretations.json'
+    if path.exists():
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+
+# Cache interpretations at module level
+_INTERPRETATIONS = None
+
+
+def _get_interpretations():
+    global _INTERPRETATIONS
+    if _INTERPRETATIONS is None:
+        _INTERPRETATIONS = _load_interpretations()
+    return _INTERPRETATIONS
+
+
+@bp.route('/api/amrit', methods=['GET'])
+def amrit_shlokas():
+    """Return the 10 iconic अमृत shlokas with interpretations."""
+    interpretations = _get_interpretations()
+    result = []
+    for shloka_id, label in AMRIT_SHLOKAS:
+        shloka = COMPLETE_LOOKUP.get(shloka_id) or SHLOKA_LOOKUP.get(shloka_id)
+        if shloka:
+            result.append({
+                'shloka_id': shloka_id,
+                'label': label,
+                'sanskrit': shloka['sanskrit'],
+                'hindi_meaning': shloka['hindi_meaning'],
+                'interpretation': interpretations.get(shloka_id, ''),
+            })
+    return jsonify({'shlokas': result})
+
+
+@bp.route('/api/topics', methods=['GET'])
+def topics():
+    """Return the 5 topic categories for the PWA."""
+    result = []
+    for key, label in TOPIC_MENU.items():
+        result.append({
+            'key': key,
+            'label': label,
+            'query': label,
+        })
+    return jsonify({'topics': result})
+
+
+@bp.route('/api/journey', methods=['GET'])
+def journey():
+    """Return shloka at a given journey position with chapter info."""
+    pos = request.args.get('pos', 0, type=int)
+    pos = max(0, min(pos, len(COMPLETE_SHLOKAS) - 1))
+
+    shloka = get_journey_shloka(pos)
+    if not shloka:
+        return jsonify({'error': 'Invalid position'}), 400
+
+    interpretations = _get_interpretations()
+    ch_info = get_chapter_info(pos)
+    chapter_complete = is_chapter_complete(pos)
+
+    # Build chapter map: for each chapter, how many shlokas and completion status
+    chapter_map = []
+    for ch in range(1, 19):
+        from models.shloka import _CHAPTER_BOUNDS
+        bounds = _CHAPTER_BOUNDS.get(ch, {})
+        first = bounds.get('first', 0)
+        last = bounds.get('last', 0)
+        total = last - first + 1
+        chapter_map.append({
+            'chapter': ch,
+            'name': CHAPTER_NAMES.get(ch, ''),
+            'total': total,
+            'first_pos': first,
+            'last_pos': last,
+        })
+
+    return jsonify({
+        'position': pos,
+        'total_shlokas': len(COMPLETE_SHLOKAS),
+        'shloka': {
+            'shloka_id': shloka['shloka_id'],
+            'sanskrit': shloka['sanskrit'],
+            'hindi_meaning': shloka['hindi_meaning'],
+            'interpretation': interpretations.get(shloka['shloka_id'], ''),
+        },
+        'chapter': {
+            'number': ch_info['chapter'],
+            'name': ch_info['name_hi'],
+            'shloka_in_chapter': pos - ch_info['first_position'] + 1,
+            'chapter_total': ch_info['last_position'] - ch_info['first_position'] + 1,
+        },
+        'chapter_complete': chapter_complete,
+        'journey_complete': pos >= len(COMPLETE_SHLOKAS) - 1,
+        'chapter_map': chapter_map,
     })

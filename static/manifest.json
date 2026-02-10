@@ -1,0 +1,23 @@
+{
+    "name": "गीता GPT — गीता से जीवन का मार्गदर्शन",
+    "short_name": "गीता GPT",
+    "description": "अपनी समस्या बोलकर बताएं, गीता से मार्गदर्शन पाएं",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#3A0A0A",
+    "theme_color": "#4A0E0E",
+    "orientation": "portrait",
+    "lang": "hi",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
