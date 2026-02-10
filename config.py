@@ -1,4 +1,4 @@
-"""GitaGPT Configuration - All settings and constants."""
+"""Gita Sarathi Configuration - All settings and constants."""
 
 import os
 import logging

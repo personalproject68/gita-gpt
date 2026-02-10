@@ -1,4 +1,4 @@
-/* GitaGPT — Voice Input (Web Speech API) */
+/* Gita Sarathi — Voice Input (Web Speech API) */
 
 const GitaVoice = {
     recognition: null,

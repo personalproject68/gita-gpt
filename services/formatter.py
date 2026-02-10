@@ -70,7 +70,7 @@ def format_shloka(shloka: dict, interpretation: str = "") -> str:
     if guidance:
         parts.extend(["", f"💭 {guidance}"])
 
-    parts.extend(["", "— गीता GPT 🙏"])
+    parts.extend(["", "— गीता सारथी 🙏"])
 
     return '\n'.join(parts)
 
@@ -84,7 +84,7 @@ def format_shloka_list(shlokas: list[dict], interpretation: str = "") -> str:
 
 
 def format_welcome() -> str:
-    return """🙏 नमस्ते! गीता GPT में आपका स्वागत है।
+    return """🙏 नमस्ते! गीता सारथी में आपका स्वागत है।
 
 मैं भगवद्गीता के ज्ञान से आपके जीवन के प्रश्नों का उत्तर देता हूं।
 
@@ -101,7 +101,7 @@ def format_welcome() -> str:
 
 
 def format_help() -> str:
-    return """🙏 गीता GPT - सहायता
+    return """🙏 गीता सारथी - सहायता
 
 📝 आप क्या कर सकते हैं:
 
@@ -115,7 +115,7 @@ def format_help() -> str:
 • और — अगला संबंधित श्लोक
 • रोकें — दैनिक श्लोक बंद करें
 
-— गीता GPT 🙏"""
+— गीता सारथी 🙏"""
 
 
 def format_topic_keyboard() -> tuple[str, dict]:
@@ -159,7 +159,7 @@ def format_daily_shloka(shloka: dict, interpretation: str = "") -> str:
     if guidance:
         parts.extend(["", f"💭 {guidance}"])
 
-    parts.extend(["", "— गीता GPT 🙏"])
+    parts.extend(["", "— गीता सारथी 🙏"])
 
     return '\n'.join(parts)
 
@@ -208,7 +208,7 @@ def format_journey_shloka(shloka: dict, interpretation: str, position: int, tota
     if guidance:
         parts.extend(["", f"💭 {guidance}"])
 
-    parts.extend(["", "— गीता GPT 🙏"])
+    parts.extend(["", "— गीता सारथी 🙏"])
 
     return '\n'.join(parts)
 
@@ -230,7 +230,7 @@ def format_journey_complete() -> str:
 
 गीता का ज्ञान सदा आपके साथ रहे। 🙏
 
-— गीता GPT 🙏"""
+— गीता सारथी 🙏"""
 
 
 def format_amrit_menu() -> tuple[str, dict]:
@@ -270,6 +270,6 @@ def format_amrit_shloka(shloka: dict, interpretation: str = "") -> str:
     if guidance:
         parts.extend(["", f"💭 {guidance}"])
 
-    parts.extend(["", "— गीता GPT 🙏"])
+    parts.extend(["", "— गीता सारथी 🙏"])
 
     return '\n'.join(parts)

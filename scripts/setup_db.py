@@ -1,4 +1,4 @@
-"""Initialize GitaGPT SQLite database."""
+"""Initialize Gita Sarathi SQLite database."""
 
 import sqlite3
 import sys

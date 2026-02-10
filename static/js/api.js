@@ -1,12 +1,13 @@
-/* GitaGPT — API Module */
+/* Gita Sarathi — API Module */
 
 const GitaAPI = {
     BASE: '',
 
     async ask(query) {
         const res = await fetch(`${this.BASE}/ask?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error('Server error');
-        return res.json();
+        // 429 (rate limit) and filtered responses return valid JSON
+        if (res.status === 429 || res.ok) return res.json();
+        throw new Error('Server error');
     },
 
     async getAmritShlokas() {

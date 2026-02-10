@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gitagpt-v2';
+const CACHE_NAME = 'gitasarathi-v3';
 const STATIC_ASSETS = [
     '/',
     '/static/css/style.css',

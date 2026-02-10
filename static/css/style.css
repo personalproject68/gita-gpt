@@ -1,4 +1,4 @@
-/* === GitaGPT — Spiritual Theme — Elder-Friendly === */
+/* === Gita Sarathi — Spiritual Theme — Elder-Friendly === */
 
 :root {
     --bg-deep: #3A0A0A;
@@ -50,7 +50,7 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 100;
-    animation: splashFade 0.6s ease-out 2.5s forwards;
+    animation: splashFade 0.3s ease-out 0.5s forwards;
 }
 
 .splash-content {
@@ -451,18 +451,69 @@ body {
     opacity: 0.7;
 }
 
-.ask-another-btn {
-    display: block;
-    width: 100%;
+/* Result action buttons row */
+.result-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.share-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #25D366;
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 0.85rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.share-btn:active {
+    opacity: 0.8;
+}
+
+.more-btn {
+    flex: 1;
     background: none;
     border: 1px solid rgba(212, 168, 71, 0.3);
     color: var(--gold-light);
     font-family: var(--font-sans);
     font-size: 1.05rem;
-    padding: 0.9rem;
+    padding: 0.85rem;
     border-radius: 12px;
     cursor: pointer;
-    margin-top: 0.5rem;
+    transition: background 0.2s;
+}
+
+.more-btn:active {
+    background: rgba(212, 168, 71, 0.1);
+}
+
+.more-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.more-card {
+    animation: slideUp 0.4s ease-out;
+}
+
+.ask-another-btn {
+    flex: 1;
+    background: none;
+    border: 1px solid rgba(212, 168, 71, 0.3);
+    color: var(--gold-light);
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    padding: 0.85rem;
+    border-radius: 12px;
+    cursor: pointer;
     transition: background 0.2s;
 }
 

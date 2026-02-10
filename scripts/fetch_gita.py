@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Bhagavad Gita Data Fetcher
-Fetches all 700 shlokas from the vedicscriptures API and structures them for Gita GPT.
+Fetches all 700 shlokas from the vedicscriptures API and structures them for Gita Sarathi.
 """
 
 import json
@@ -132,7 +132,7 @@ def save_csv(data: list[dict], filepath: Path):
 def main():
     """Main function to fetch and save all Gita data."""
     print("=" * 60)
-    print("Bhagavad Gita Data Fetcher for Gita GPT")
+    print("Bhagavad Gita Data Fetcher for Gita Sarathi")
     print("=" * 60)
     print(f"Total chapters: 18")
     print(f"Total shlokas: {sum(CHAPTER_VERSES.values())}")

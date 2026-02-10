@@ -1,4 +1,4 @@
-# GitaGPT - Project Context
+# Gita Sarathi - Project Context
 
 ## What is this?
 Telegram chatbot that answers life questions using Bhagavad Gita shlokas. Hindi-focused, targets elderly Indian users (55+).
@@ -137,10 +137,10 @@ Shown as Telegram inline keyboard buttons (no typing needed).
 
 [AI interpretation - 3-4 lines]
 
-— गीता GPT 🙏
+— गीता सारथी 🙏
 ```
 
-Footer "गीता GPT 🙏" acts as organic branding when forwarded.
+Footer "गीता सारथी 🙏" acts as organic branding when forwarded.
 
 ---
 
@@ -161,7 +161,7 @@ find_relevant_shlokas() → 1 shloka (semantic search)
     ↓
 get_ai_interpretation() → Deep Gemini context
     ↓
-Format with forward-friendly footer (गीता GPT 🙏)
+Format with forward-friendly footer (गीता सारथी 🙏)
     ↓
 Telegram Bot API response
 ```
@@ -269,7 +269,6 @@ Before implementing ANY feature:
 4. Reference ID in commits: `feat(P1): description`
 5. Update status in DECISIONS.md when done
 
-**Files:** All in root directory
-**Full methodology:** `docs/PRODUCT_LEDGER_METHODOLOGY.md`
+**Files:** All in `docs/` directory
 
 NEVER write code without completing deliberation first.

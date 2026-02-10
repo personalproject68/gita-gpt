@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run GitaGPT bot locally using Telegram long polling (no webhook needed)."""
+"""Run Gita Sarathi bot locally using Telegram long polling (no webhook needed)."""
 
 import sys
 import logging
@@ -67,7 +67,7 @@ def process_update(update):
 
 
 def main():
-    logger.info("Starting GitaGPT bot...")
+    logger.info("Starting Gita Sarathi bot...")
 
     # Delete any existing webhook first
     requests.post(f"{BASE_URL}/deleteWebhook", timeout=10)

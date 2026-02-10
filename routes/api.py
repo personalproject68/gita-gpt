@@ -6,6 +6,8 @@ from flask import Blueprint, request, jsonify
 from services.search import find_relevant_shlokas
 from services.ai_interpretation import get_ai_interpretation, get_contextual_interpretation
 from services.daily import send_daily_push
+from guardrails.content_filter import check_content
+from guardrails.sanitizer import sanitize_input, is_valid_input
 from models.shloka import (
     SHLOKA_LOOKUP, COMPLETE_LOOKUP, COMPLETE_SHLOKAS, CHAPTER_NAMES,
     get_daily_shloka, get_journey_shloka, get_chapter_info, is_chapter_complete,
@@ -17,6 +19,26 @@ logger = logging.getLogger('gitagpt.api')
 
 bp = Blueprint('api', __name__)
 
+# Simple in-memory rate limiter for web API (no SQLite dependency)
+import time as _time
+_web_rate_limits: dict[str, list[float]] = {}
+_WEB_RATE_LIMIT = 20
+_WEB_RATE_WINDOW = 3600  # 1 hour
+
+
+def _check_web_rate_limit(client_ip: str) -> bool:
+    """Return True if within limit, False if rate limited."""
+    now = _time.time()
+    cutoff = now - _WEB_RATE_WINDOW
+    timestamps = _web_rate_limits.get(client_ip, [])
+    timestamps = [t for t in timestamps if t > cutoff]
+    if len(timestamps) >= _WEB_RATE_LIMIT:
+        _web_rate_limits[client_ip] = timestamps
+        return False
+    timestamps.append(now)
+    _web_rate_limits[client_ip] = timestamps
+    return True
+
 
 @bp.route('/ask', methods=['GET'])
 def ask():
@@ -24,6 +46,31 @@ def ask():
     query = request.args.get('q', '')
     if not query:
         return jsonify({'error': 'Please provide ?q=your question'}), 400
+
+    # Sanitize + validate
+    query = sanitize_input(query)
+    if not is_valid_input(query):
+        return jsonify({'error': 'कृपया अपना प्रश्न विस्तार से लिखें।'}), 400
+
+    # Content filter (profanity, manipulation, off-topic)
+    is_ok, reason = check_content(query)
+    if not is_ok:
+        return jsonify({
+            'query': query,
+            'shlokas': [],
+            'interpretation': '',
+            'filtered': reason,
+            'message': 'आपके मन में कुछ कठिन भाव हैं। क्या मैं गीता का मार्गदर्शन दूं?',
+        })
+
+    # IP-based rate limiting for web (simple in-memory)
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or 'unknown')
+    client_ip = client_ip.split(',')[0].strip()
+    if not _check_web_rate_limit(client_ip):
+        return jsonify({
+            'error': 'कृपया थोड़ा रुकें, बहुत तेज़ी से प्रश्न आ रहे हैं।',
+            'rate_limited': True,
+        }), 429
 
     shlokas = find_relevant_shlokas(query)
 
@@ -61,7 +108,7 @@ def daily_push():
 @bp.route('/health', methods=['GET'])
 def health():
     """Health check endpoint."""
-    return jsonify({'status': 'ok', 'service': 'GitaGPT'})
+    return jsonify({'status': 'ok', 'service': 'Gita Sarathi'})
 
 
 @bp.route('/shloka/<shloka_id>', methods=['GET'])

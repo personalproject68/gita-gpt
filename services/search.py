@@ -2,7 +2,7 @@
 
 import os
 import logging
-from models.shloka import SHLOKAS, SHLOKA_LOOKUP, CURATED_TOPICS, TOPIC_INDEX
+from models.shloka import SHLOKAS, SHLOKA_LOOKUP, COMPLETE_LOOKUP, CURATED_TOPICS, TOPIC_INDEX
 from config import DATA_DIR
 from services.metrics import log_event
 
@@ -57,7 +57,7 @@ class SemanticSearch:
     # Chapter 1 is narrative (battlefield description), not spiritual advice
     SKIP_CHAPTERS = {'1'}
     # Distance threshold — above this, results are too weak to trust
-    MAX_DISTANCE = 0.40
+    MAX_DISTANCE = 0.50
 
     def search(self, query: str, n_results: int = 3) -> list[str]:
         if not self._init_lazy():
@@ -141,10 +141,13 @@ def detect_topics(query: str) -> list[str]:
 
 def find_relevant_shlokas(query: str, max_results: int = 3) -> list[dict]:
     """Find relevant shlokas: semantic search -> curated topics -> keyword fallback."""
-    # Try semantic search first
+    # Try semantic search first (searches all 701 shlokas)
     shloka_ids = _semantic_search.search(query, n_results=max_results)
     if shloka_ids:
-        results = [SHLOKA_LOOKUP[sid] for sid in shloka_ids if sid in SHLOKA_LOOKUP]
+        # Look up in COMPLETE_LOOKUP (701) first, fall back to SHLOKA_LOOKUP (100 curated)
+        results = [COMPLETE_LOOKUP.get(sid) or SHLOKA_LOOKUP.get(sid)
+                   for sid in shloka_ids]
+        results = [r for r in results if r]
         if results:
             logger.info(f"[Semantic] {[s['shloka_id'] for s in results]}")
             return results

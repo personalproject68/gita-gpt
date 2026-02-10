@@ -1,4 +1,4 @@
-/* GitaGPT — Main App */
+/* Gita Sarathi — Main App */
 
 (function () {
     'use strict';
@@ -28,12 +28,12 @@
     let amritData = null;
     let journeyLoaded = false;
 
-    // === Splash ===
+    // === Splash (brief — don't make users wait) ===
     setTimeout(() => {
         splash.style.display = 'none';
         app.classList.remove('hidden');
         app.classList.add('visible');
-    }, 3000);
+    }, 800);
 
     // === Navigation ===
     navBtns.forEach(btn => {
@@ -112,6 +112,16 @@
 
         try {
             const data = await GitaAPI.ask(query);
+            if (data.rate_limited) {
+                showError(data.error);
+                hideLoading();
+                return;
+            }
+            if (data.filtered) {
+                showError(data.message || 'कृपया अलग शब्दों में पूछें।');
+                hideLoading();
+                return;
+            }
             showShloka(data);
         } catch (err) {
             showError('सर्वर से जुड़ नहीं पाए। कृपया फिर कोशिश करें।');
@@ -143,16 +153,58 @@
         const s = data.shlokas[0];
         const parsed = formatInterpretation(data.interpretation || '');
 
+        // Build share text
+        const shareText = `📿 गीता ${s.shloka_id}\n\n${s.sanskrit}\n\n${s.hindi_meaning}\n\n— गीता सारथी 🙏\nhttps://www.gitasarathi.in`;
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+
+        // Check if there are more shlokas to show
+        const hasMore = data.shlokas && data.shlokas.length > 1;
+
         shlokaResult.innerHTML = `
             <div class="shloka-card">
                 <div class="shloka-ref">गीता ${s.shloka_id}</div>
                 <div class="shloka-sanskrit">${escapeHtml(s.sanskrit)}</div>
                 <div class="shloka-meaning">${escapeHtml(s.hindi_meaning)}</div>
                 <div class="shloka-interpretation">${renderInterpretation(parsed)}</div>
-                <div class="shloka-footer">— गीता GPT</div>
+                <div class="shloka-footer">— गीता सारथी</div>
             </div>
-            <button class="ask-another-btn" onclick="resetHome()">और पूछें</button>`;
+            <div class="result-actions">
+                <a href="${whatsappUrl}" target="_blank" rel="noopener" class="share-btn">भेजें ↗</a>
+                ${hasMore ? '<button class="more-btn" id="showMoreBtn">और बताएं</button>' : ''}
+                <button class="ask-another-btn" onclick="resetHome()">नया प्रश्न</button>
+            </div>`;
         shlokaResult.classList.remove('hidden');
+
+        // "और बताएं" — show next shloka from results
+        if (hasMore) {
+            let moreIndex = 1;
+            const moreBtn = document.getElementById('showMoreBtn');
+            moreBtn.addEventListener('click', () => {
+                if (moreIndex >= data.shlokas.length) {
+                    moreBtn.textContent = 'और श्लोक उपलब्ध नहीं';
+                    moreBtn.disabled = true;
+                    return;
+                }
+                const nextS = data.shlokas[moreIndex];
+                // Use pre-fetched interpretation if available (no extra API call)
+                const moreCard = document.createElement('div');
+                moreCard.className = 'shloka-card more-card';
+                moreCard.innerHTML = `
+                    <div class="shloka-ref">गीता ${nextS.shloka_id}</div>
+                    <div class="shloka-sanskrit">${escapeHtml(nextS.sanskrit)}</div>
+                    <div class="shloka-meaning">${escapeHtml(nextS.hindi_meaning)}</div>
+                    <div class="shloka-footer">— गीता सारथी</div>`;
+                // Insert before the actions row
+                const actionsRow = shlokaResult.querySelector('.result-actions');
+                shlokaResult.insertBefore(moreCard, actionsRow);
+                moreCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                moreIndex++;
+                if (moreIndex >= data.shlokas.length) {
+                    moreBtn.textContent = 'और श्लोक उपलब्ध नहीं';
+                    moreBtn.disabled = true;
+                }
+            });
+        }
 
         // Scroll to result
         shlokaResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -236,7 +288,7 @@
                     <div class="shloka-sanskrit">${escapeHtml(s.sanskrit)}</div>
                     <div class="shloka-meaning">${escapeHtml(s.hindi_meaning)}</div>
                     <div class="shloka-interpretation">${renderInterpretation(parsed)}</div>
-                    <div class="shloka-footer">— गीता GPT</div>
+                    <div class="shloka-footer">— गीता सारथी</div>
                 </div>
             </div>`;
         document.getElementById('amritBack').addEventListener('click', renderAmritList);
@@ -342,7 +394,7 @@
                 <div class="shloka-sanskrit">${escapeHtml(s.sanskrit)}</div>
                 <div class="shloka-meaning">${escapeHtml(s.hindi_meaning)}</div>
                 <div class="shloka-interpretation">${renderInterpretation(parsed)}</div>
-                <div class="shloka-footer">— गीता GPT</div>
+                <div class="shloka-footer">— गीता सारथी</div>
             </div>`;
 
         if (data.chapter_complete) {
@@ -428,7 +480,7 @@
         banner.className = 'install-banner';
         banner.innerHTML = `
             <div class="install-text">
-                <strong>गीता GPT</strong> को Home Screen पर जोड़ें
+                <strong>गीता सारथी</strong> को Home Screen पर जोड़ें
             </div>
             <div class="install-actions">
                 <button class="install-btn" id="installBtn">जोड़ें</button>

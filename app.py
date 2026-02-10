@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GitaGPT - Telegram Bot for Bhagavad Gita guidance."""
+"""Gita Sarathi - Telegram Bot & PWA for Bhagavad Gita guidance."""
 
 import os
 from dotenv import load_dotenv

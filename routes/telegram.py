@@ -114,7 +114,7 @@ def _handle_command(chat_id, text):
         stats = get_daily_stats()
         if stats:
             text = (
-                f"📊 GitaGPT Stats — {stats['date']}\n\n"
+                f"📊 Gita Sarathi Stats — {stats['date']}\n\n"
                 f"👥 DAU yesterday: {stats['dau']}\n"
                 f"🆕 New users: {stats['new_users']}\n"
                 f"💬 Messages: {stats['total_messages']}\n"
