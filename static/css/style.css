@@ -272,11 +272,17 @@ body {
 }
 
 .mic-status {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--gold-light);
     margin-top: 0.75rem;
     min-height: 1.4em;
     text-align: center;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* === Text Input === */
@@ -296,6 +302,7 @@ body {
 
 .query-input {
     flex: 1;
+    min-width: 0;
     background: none;
     border: none;
     outline: none;
@@ -303,6 +310,7 @@ body {
     font-family: var(--font-sans);
     font-size: 1.1rem;
     padding: 0.6rem 0;
+    text-overflow: ellipsis;
 }
 
 .query-input::placeholder {

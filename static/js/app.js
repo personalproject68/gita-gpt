@@ -107,7 +107,7 @@
                     break;
                 case 'interim':
                     queryInput.value = data;
-                    micStatus.textContent = '⬆ भेजने के लिए दबाएं';
+                    micStatus.textContent = data.length > 40 ? '...' + data.slice(-40) : data;
                     break;
                 case 'stopped':
                     micBtn.classList.remove('listening');

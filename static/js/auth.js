@@ -12,27 +12,35 @@ const GitaAuth = {
     },
 
     async sendOTP(phone) {
-        const res = await fetch('/api/auth/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone }),
-        });
-        return res.json();
+        try {
+            const res = await fetch('/api/auth/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone }),
+            });
+            return await res.json();
+        } catch (e) {
+            return { error: 'नेटवर्क समस्या, फिर कोशिश करें' };
+        }
     },
 
     async verifyOTP(phone, otp) {
-        const res = await fetch('/api/auth/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, otp }),
-        });
-        const data = await res.json();
-        if (data.success && data.token) {
-            this.token = data.token;
-            localStorage.setItem('gita_token', data.token);
-            await this.syncJourney();
+        try {
+            const res = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, otp }),
+            });
+            const data = await res.json();
+            if (data.success && data.token) {
+                this.token = data.token;
+                localStorage.setItem('gita_token', data.token);
+                await this.syncJourney();
+            }
+            return data;
+        } catch (e) {
+            return { error: 'नेटवर्क समस्या, फिर कोशिश करें' };
         }
-        return data;
     },
 
     async syncJourney() {
