@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gitasarathi-v3';
+const CACHE_NAME = 'gitasarathi-v4';
 const STATIC_ASSETS = [
     '/',
     '/static/css/style.css',
@@ -26,24 +26,16 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch — network first for API, cache first for static
+// Fetch — network first for everything, fall back to cache
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-
-    // API calls: network first
-    if (url.pathname.startsWith('/ask') || url.pathname.startsWith('/api/') || url.pathname.startsWith('/shloka/')) {
-        event.respondWith(
-            fetch(event.request).catch(() =>
-                new Response(JSON.stringify({ error: 'ऑफ़लाइन हैं' }), {
-                    headers: { 'Content-Type': 'application/json' },
-                })
-            )
-        );
-        return;
-    }
-
-    // Static: cache first, then network
     event.respondWith(
-        caches.match(event.request).then((cached) => cached || fetch(event.request))
+        fetch(event.request)
+            .then((response) => {
+                // Update cache with fresh response
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                return response;
+            })
+            .catch(() => caches.match(event.request))
     );
 });
